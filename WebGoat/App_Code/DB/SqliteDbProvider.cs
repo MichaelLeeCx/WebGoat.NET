@@ -405,6 +405,7 @@ namespace OWASP.WebGoat.NET.App_Code.DB
             }
         }
 
+        /* Unsantized Version of GetProductDetails() Function
         public DataSet GetProductDetails(string productCode)
         {
             string sql = string.Empty;
@@ -432,6 +433,35 @@ namespace OWASP.WebGoat.NET.App_Code.DB
                 ds.Relations.Add(dr);
                 return ds;
             }
+        }
+        */
+
+        public DataSet GetProductDetails(string productCode)
+        {
+            DataSet ds = new DataSet();
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                using (SqliteCommand cmd = new SqliteCommand("SELECT * FROM Products WHERE productCode = @productCode", connection))
+                {
+                    cmd.Parameters.AddWithValue("@productCode", productCode);
+
+                    SqliteDataAdapter da = new SqliteDataAdapter(cmd);
+                    da.Fill(ds, "products");
+                }
+
+                using (SqliteCommand cmd = new SqliteCommand("SELECT * FROM Comments WHERE productCode = @productCode", connection))
+                {
+                    cmd.Parameters.AddWithValue("@productCode", productCode);
+
+                    SqliteDataAdapter da = new SqliteDataAdapter(cmd);
+                    da.Fill(ds, "comments");
+                }
+            }
+
+            return ds;
         }
 
         public DataSet GetOrderDetails(int orderNumber)
